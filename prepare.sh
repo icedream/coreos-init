@@ -274,8 +274,7 @@ then
 
 	coreos_losetup_device="$(sudo losetup --show -f -P "$coreos_unpacked_image")"
 	coreos_boot_mount_dir="$(mktemp -d)"
-	#sudo mount "${coreos_losetup_device}p1" "$coreos_boot_mount_dir"
-	false || (
+	sudo mount "${coreos_losetup_device}p1" "$coreos_boot_mount_dir" || (
 		# Create new downgraded version of the ext4 partition since some systems can't deal with it being mounted read-write
 		echo "Rewriting boot partition for this system so it can be modified, this could take a good while..."
 		sudo mount -o ro "${coreos_losetup_device}p1" "$coreos_boot_mount_dir"
