@@ -282,8 +282,13 @@ then
 		(
 			tar -v -c -C "$coreos_boot_mount_dir" -p -f "$downgrade_ext4_archive" --exclude=lost+found .
 			sudo umount "${coreos_losetup_device}p1"
-			"$(command -v blkid || echo "/usr/sbin/blkid")" "${coreos_losetup_device}p1"
-			uuid=$("$(command -v blkid || echo "/usr/sbin/blkid")" -o value -s UUID "${coreos_losetup_device}p1")
+			blkid="$(export PATH=/usr/sbin:/sbin:$PATH && command -v blkid)"
+			if [ -z "$blkid" ]
+			then
+				echo "ERROR: blkid not found, can not continue. Please install util-linux." >&2
+				exit 1
+			fi
+			uuid=$("$blkid" -o value -s UUID "${coreos_losetup_device}p1")
 			sudo mkfs.ext4 -F -L boot -U "$uuid" "${coreos_losetup_device}p1"
 			sudo mount "${coreos_losetup_device}p1" "$coreos_boot_mount_dir"
 			sudo tar -v -x -C "$coreos_boot_mount_dir" -p -f "$downgrade_ext4_archive"
